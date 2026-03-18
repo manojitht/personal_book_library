@@ -1,23 +1,12 @@
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from app.models.users import User
 from app.schemas.users import UserCreate
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
+from app.core.security import get_password_hash
 
 class UserService:
     @staticmethod
-    def get_password_hash(password: str) -> str:
-        # Manual truncation as suggested by the error, though Schema validation is better
-        return pwd_context.hash(password)
-
-    @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
-
-    @staticmethod
     def create_user(db: Session, user: UserCreate):
-        hashed_pw = UserService.get_password_hash(user.password)
+        hashed_pw = get_password_hash(user.password)
         db_user = User(
             username=user.username,
             email=user.email,
