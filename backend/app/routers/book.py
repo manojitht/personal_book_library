@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.db.database import get_db
@@ -22,3 +22,14 @@ def list_books(
 ):
     return BookService.get_user_books(db, current_user.id, skip, limit, search)
 
+@router.put("/{book_id}", response_model=BookResponse)
+def update_book(
+    book_id: int, 
+    book_update: BookCreate, 
+    db: Session = Depends(get_db), 
+    current_user = Depends(get_current_user)
+):
+    updated_book = BookService.update_book(db, book_id, current_user.id, book_update)
+    if not updated_book:
+        raise HTTPException(status_code=404, detail="Book not found or unauthorized")
+    return updated_book
