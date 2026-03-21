@@ -1,21 +1,24 @@
 from pydantic import BaseModel
-from datetime import date
 from typing import Optional
+from datetime import date
 
-class BookBase(BaseModel):
+class BookCreate(BaseModel):
     title: str
     author: str
-    publication_date: Optional[date] = None
-    isbn: Optional[str] = None
-    cover_image_url: Optional[str] = None
+    publication_date: Optional[date]
+    isbn: Optional[str]
+    cover_image_url: Optional[str]
 
-class BookCreate(BookBase):
-    pass
+class BookUpdate(BaseModel):
+    title: Optional[str]
+    author: Optional[str]
+    publication_date: Optional[date]
+    isbn: Optional[str]
+    cover_image_url: Optional[str]
 
-class BookResponse(BookBase):
+class BookResponse(BookCreate):
     id: int
     owner_id: int
 
     class Config:
         from_attributes = True
-
