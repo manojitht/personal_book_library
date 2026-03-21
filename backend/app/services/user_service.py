@@ -1,24 +1,18 @@
 from sqlalchemy.orm import Session
+from app.repositories.user_repository import UserRepository
 from app.models.users import User
 from app.schemas.users import UserCreate
-from app.core.security import get_password_hash
+from app.core.security import hash_password
 
 class UserService:
     @staticmethod
-    def create_user(db: Session, user: UserCreate):
-        hashed_pw = get_password_hash(user.password)
+    def register(db: Session, user: UserCreate):
+        if UserRepository.get_by_username(db, user.username):
+            raise ValueError("Username already exists")
+
         db_user = User(
             username=user.username,
             email=user.email,
-            hashed_password=hashed_pw
+            hashed_password=hash_password(user.password)
         )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-
-    @staticmethod
-    def get_user_by_username(db: Session, username: str):
-        return db.query(User).filter(User.username == username).first()
-    
-    
+        return UserRepository.create(db, db_user)
